@@ -1,4 +1,5 @@
 import numpy as np
+import math
 def interpolate_angles(I):
     import numpy as np
     '''
@@ -33,3 +34,47 @@ def interpolate_angles(I):
     O[Max1<0.5]=-1
     O[O<0] = np.pi*np.random.rand(np.sum(O<0))
     return O
+
+def get_l_p(L):
+    '''calculate division parameters of line of size L to overlapping segments,
+    return dict of {l:segment length, p: overlapping, n: segment counts, res: overage of L}'''
+    import math
+    if L<=500: return {'l': L, 'p': 0, 'n': 1, 'res': 0}    
+#     assert L>500, 'L must be greater then 500'
+    p0=100
+    l0=500
+    n=math.ceil((L-p0)/(l0-p0))
+    L_hat=l0*n-(n-1)*p0
+    dL=L_hat-L    
+    diff=dL
+    a0=0
+    b0=0
+    for a in range (dL//n,-1,-1):
+        dl_res=dL%(n*a) if a>0 else dL
+        b=dl_res//(n-1)
+        
+        if dl_res%(n-1)==0:
+            a0=a
+            b0=b
+            diff=0
+            break        
+        
+        if dl_res%(n-1)<diff:        
+            diff=dl_res%(n-1)
+            a0=a
+            b0=b               
+    
+    return {'l': l0-a0,'p':b0+p0, 'n': n, 'res':diff}
+
+# def get_l_p(L):
+#     import math
+#     p0=100
+#     l0=500
+#     n=math.ceil((L-p0)/(l0-p0))
+#     L_hat=l0*n-(n-1)*p0
+#     dL=L_hat-L
+#     cnt=0
+#     while dL%n:
+#         cnt+=1
+#         dL-=(n-1)
+#     return cnt+p0, l0-dL//n, n
