@@ -153,4 +153,22 @@ class COBresolve_image:
         outp=self.merger (np.array(predictions), overlapping, n, res)
         return np.transpose(outp,axes=(0,2,1))
     
+    def resolve_imar(self, image_array):        
+        
+        import numpy as np
+        
+        mn=np.array([122.67891434, 116.66876762,104.00698793])
+        data=(image_array[:,:,:3]-mn)[:,:,[2,1,0]]
+        prepr_im= np.transpose(data,axes=(1,0,2))        
+        batches, overlapping, n, res=self.batcherize (prepr_im)
+        predictions=[]
+        for i in batches:            
+            raw_pred=[i[0,:,:,0] for i in self.model.predict(i[None])]
+            
+            angles=self.interpolate_angles(np.array(raw_pred[:-2]))
+            predictions.append([raw_pred[-1],raw_pred[-2],angles])
+        
+        outp=self.merger (np.array(predictions), overlapping, n, res)
+        return np.transpose(outp,axes=(0,2,1))
+    
         
